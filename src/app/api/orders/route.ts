@@ -6,27 +6,35 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const order = await prisma.order.create({
-      data: {
-        orderType: body.orderType,
-        paymentMethod: body.paymentMethod || 'bank_transfer',
-        customerName: body.customerName,
-        customerPhone: body.customerPhone,
-        deliveryDate: body.deliveryDate,
-        deliveryHour: body.deliveryHour,
-        addressCity: body.addressCity || '',
-        addressDistrict: body.addressDistrict || '',
-        addressDong: body.addressDong || '',
-        addressDetail: body.addressDetail || '',
-        request: body.request || '',
-        productId: body.productId,
-      },
-      include: { product: true },
-    });
 
-    const settings = await prisma.settings.findMany({
-      where: { key: { in: ['bank_name', 'bank_account', 'bank_holder'] } },
-    });
+    // Run order creation and settings fetch in parallel for maximum speed
+    const [order, settings] = await Promise.all([
+      prisma.order.create({
+        data: {
+          orderType: body.orderType,
+          paymentMethod: body.paymentMethod || 'bank_transfer',
+          customerName: body.customerName,
+          customerPhone: body.customerPhone,
+          deliveryDate: body.deliveryDate,
+          deliveryHour: body.deliveryHour,
+          addressCity: body.addressCity || '',
+          addressDistrict: body.addressDistrict || '',
+          addressDong: body.addressDong || '',
+          addressDetail: body.addressDetail || '',
+          request: body.request || '',
+          productId: body.productId,
+        },
+        include: {
+          product: {
+            select: { id: true, name: true, price: true },
+          },
+        },
+      }),
+      prisma.settings.findMany({
+        where: { key: { in: ['bank_name', 'bank_account', 'bank_holder'] } },
+      }),
+    ]);
+
     const bankInfo: Record<string, string> = {};
     settings.forEach((s) => { bankInfo[s.key] = s.value; });
 
@@ -51,7 +59,11 @@ export async function GET(request: NextRequest) {
       customerName: name,
       customerPhone: { endsWith: phoneLast4 },
     },
-    include: { product: true },
+    include: {
+      product: {
+        select: { id: true, name: true, price: true },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   });
 

@@ -5,7 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const orders = await prisma.order.findMany({
-    include: { product: true },
+    include: {
+      product: {
+        select: { id: true, name: true, price: true },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   });
   return NextResponse.json(orders);
