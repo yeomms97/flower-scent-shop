@@ -23,6 +23,18 @@ function OrderForm() {
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'card'>('bank_transfer');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+
+  // 전화번호 자동 하이픈 (010-XXXX-XXXX) 포맷팅 함수
+  const formatPhoneNumber = (val: string) => {
+    const digits = val.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(formatPhoneNumber(e.target.value));
+  };
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(11);
   const [day, setDay] = useState(25);
@@ -222,9 +234,10 @@ function OrderForm() {
             />
             <input
               type="tel"
-              placeholder="휴대전화 번호 (예: 010-1234-5678)"
+              placeholder="휴대전화 번호 (숫자만 입력해도 자동 변환)"
               value={phone}
-              onChange={e => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
+              maxLength={13}
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-300"
               required
             />

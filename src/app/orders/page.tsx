@@ -62,8 +62,22 @@ export default function OrdersPage() {
         <form onSubmit={handleSearch} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 mb-6">
           <input type="text" placeholder="이름" value={name} onChange={e => setName(e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200" required />
-          <input type="text" placeholder="휴대전화 뒷자리 4자리" value={phoneLast4} onChange={e => setPhoneLast4(e.target.value)}
-            maxLength={4} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200" required />
+          <input
+            type="text"
+            placeholder="휴대전화 뒷자리 4자리 (예: 5678)"
+            value={phoneLast4}
+            onChange={e => {
+              const digits = e.target.value.replace(/[^0-9]/g, '');
+              if (digits.length > 4) {
+                setPhoneLast4(digits.slice(-4));
+              } else {
+                setPhoneLast4(digits);
+              }
+            }}
+            maxLength={13}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200"
+            required
+          />
           <button type="submit" disabled={loading}
             className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-lg text-sm font-semibold transition disabled:opacity-50">
             {loading ? '조회 중...' : '조회하기'}
