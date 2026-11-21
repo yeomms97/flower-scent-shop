@@ -16,6 +16,7 @@ function OrderForm() {
   const router = useRouter();
   const productIdParam = searchParams.get('productId');
 
+  const [shopName, setShopName] = useState('꽃향기 플라워');
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<number>(0);
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
@@ -43,6 +44,9 @@ function OrderForm() {
       } else if (data.length > 0) {
         setSelectedProductId(data[0].id);
       }
+    });
+    fetch('/api/admin/settings').then(r => r.json()).then(data => {
+      if (data.shop_name) setShopName(data.shop_name);
     });
     const now = new Date();
     setYear(now.getFullYear());
@@ -90,7 +94,7 @@ function OrderForm() {
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm border-b border-gray-100">
           <div className="max-w-2xl mx-auto px-4 py-4">
-            <Link href="/" className="text-xl font-bold text-gray-800">🌸 꽃향기 플라워</Link>
+            <Link href="/" className="text-xl font-bold text-gray-800">🌸 {shopName}</Link>
           </div>
         </header>
         <main className="max-w-lg mx-auto px-4 py-10">
@@ -145,7 +149,7 @@ function OrderForm() {
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link href="/" className="text-gray-400 hover:text-gray-600">←</Link>
-          <h1 className="text-lg font-bold text-gray-800">주문하기</h1>
+          <h1 className="text-lg font-bold text-gray-800">{shopName} - 주문하기</h1>
         </div>
       </header>
 

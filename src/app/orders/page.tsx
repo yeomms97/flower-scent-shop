@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 interface Order {
@@ -22,11 +22,18 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const [shopName, setShopName] = useState('꽃향기 플라워');
   const [name, setName] = useState('');
   const [phoneLast4, setPhoneLast4] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/settings').then(r => r.json()).then(data => {
+      if (data.shop_name) setShopName(data.shop_name);
+    });
+  }, []);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +54,7 @@ export default function OrdersPage() {
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <Link href="/" className="text-gray-400 hover:text-gray-600">←</Link>
-          <h1 className="text-lg font-bold text-gray-800">주문내역 확인</h1>
+          <h1 className="text-lg font-bold text-gray-800">{shopName} - 주문내역 확인</h1>
         </div>
       </header>
 
