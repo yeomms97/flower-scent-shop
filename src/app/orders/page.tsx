@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 interface Order {
   id: number;
   orderType: string;
@@ -19,6 +26,8 @@ interface Order {
   isCompleted: boolean;
   createdAt: string;
   product: { name: string; price: number };
+  itemsJson?: string | null;
+  totalAmount?: number | null;
 }
 
 export default function OrdersPage() {
@@ -97,8 +106,38 @@ export default function OrdersPage() {
                 </span>
                 <span className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleString('ko-KR')}</span>
               </div>
-              <h3 className="font-semibold text-gray-800">{order.product.name}</h3>
-              <p className="text-rose-500 font-bold text-sm">{order.product.price.toLocaleString()}원</p>
+              {(() => {
+                let items: OrderItem[] = [];
+                if (order.itemsJson) {
+                  try {
+                    items = JSON.parse(order.itemsJson);
+                  } catch {}
+                }
+                const displayTotal = order.totalAmount || order.product.price;
+
+                if (items.length > 0) {
+                  return (
+                    <div className="space-y-1.5 pb-3 border-b border-gray-100">
+                      {items.map((it, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-sm">
+                          <span className="font-medium text-gray-800">{it.name} × {it.quantity}개</span>
+                          <span className="text-gray-600">{(it.price * it.quantity).toLocaleString()}원</span>
+                        </div>
+                      ))}
+                      <div className="pt-2 flex justify-between items-center">
+                        <span className="text-xs text-gray-500">총 결제금액</span>
+                        <span className="text-rose-500 font-bold text-base">{displayTotal.toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div>
+                    <h3 className="font-semibold text-gray-800">{order.product.name}</h3>
+                    <p className="text-rose-500 font-bold text-sm">{order.product.price.toLocaleString()}원</p>
+                  </div>
+                );
+              })()}
               <div className="mt-3 space-y-1 text-sm text-gray-600">
                 <p>수령 방식: <span className="font-medium">{order.orderType === 'delivery' ? '배달' : '픽업'}</span></p>
                 <p>결제 방식: <span className="font-medium">{order.paymentMethod === 'bank_transfer' ? '계좌이체' : '카드결제'}</span></p>

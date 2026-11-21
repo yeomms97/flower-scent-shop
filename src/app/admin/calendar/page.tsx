@@ -17,6 +17,8 @@ interface Order {
   request: string;
   isCompleted: boolean;
   product: { name: string; price: number };
+  itemsJson?: string | null;
+  totalAmount?: number | null;
 }
 
 export default function CalendarPage() {
@@ -116,7 +118,21 @@ export default function CalendarPage() {
                       {order.isCompleted ? '완료' : '접수'}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700">{order.product.name} <span className="text-rose-500">{order.product.price.toLocaleString()}원</span></p>
+                  {(() => {
+                    let items: { name: string; price: number; quantity: number }[] = [];
+                    if (order.itemsJson) {
+                      try { items = JSON.parse(order.itemsJson); } catch {}
+                    }
+                    const total = order.totalAmount || order.product.price;
+                    const nameDisplay = items.length > 1
+                      ? `${items[0].name} 외 ${items.length - 1}종 (${items.reduce((s, i) => s + i.quantity, 0)}개)`
+                      : order.product.name;
+                    return (
+                      <p className="text-sm text-gray-700 font-medium">
+                        {nameDisplay} <span className="text-rose-500 font-bold ml-1">{total.toLocaleString()}원</span>
+                      </p>
+                    );
+                  })()}
                   <p className="text-xs text-gray-500 mt-1">{order.customerName} | {order.customerPhone}</p>
                   {order.orderType === 'delivery' && (
                     <p className="text-xs text-gray-400 mt-0.5">{order.addressCity} {order.addressDistrict} {order.addressDong} {order.addressDetail}</p>

@@ -18,6 +18,8 @@ interface Order {
   isCompleted: boolean;
   createdAt: string;
   product: { name: string; price: number };
+  itemsJson?: string | null;
+  totalAmount?: number | null;
 }
 
 type SortKey = 'isCompleted' | 'createdAt' | 'deliveryDate' | 'productName' | 'customerName';
@@ -184,22 +186,33 @@ export default function AdminOrdersPage() {
   // 엑셀 다운로드 (시/구/동/상세주소 개별 컬럼 분리)
   const downloadExcel = async () => {
     const XLSX = await import('xlsx');
-    const data = sortedOrders.map(o => ({
-      '완료': o.isCompleted ? 'O' : '',
-      '주문일시': new Date(o.createdAt).toLocaleString('ko-KR'),
-      '배달/픽업일시': `${o.deliveryDate} ${o.deliveryHour}시`,
-      '수령방식': o.orderType === 'delivery' ? '배달' : '픽업',
-      '결제방식': o.paymentMethod === 'bank_transfer' ? '계좌이체' : '카드결제',
-      '상품명': o.product.name,
-      '가격': o.product.price,
-      '고객성함': o.customerName,
-      '전화번호': o.customerPhone,
-      '시': o.orderType === 'delivery' ? o.addressCity : '',
-      '구': o.orderType === 'delivery' ? o.addressDistrict : '',
-      '동': o.orderType === 'delivery' ? o.addressDong : '',
-      '상세주소': o.orderType === 'delivery' ? o.addressDetail : '',
-      '요청사항': o.request,
-    }));
+    const data = sortedOrders.map(o => {
+      let items: { name: string; price: number; quantity: number }[] = [];
+      if (o.itemsJson) {
+        try { items = JSON.parse(o.itemsJson); } catch {}
+      }
+      const productNameStr = items.length > 0
+        ? items.map(i => `${i.name} (${i.quantity}개)`).join(', ')
+        : o.product.name;
+      const finalPrice = o.totalAmount || o.product.price;
+
+      return {
+        '완료': o.isCompleted ? 'O' : '',
+        '주문일시': new Date(o.createdAt).toLocaleString('ko-KR'),
+        '배달/픽업일시': `${o.deliveryDate} ${o.deliveryHour}시`,
+        '수령방식': o.orderType === 'delivery' ? '배달' : '픽업',
+        '결제방식': o.paymentMethod === 'bank_transfer' ? '계좌이체' : '카드결제',
+        '상품명': productNameStr,
+        '가격': finalPrice,
+        '고객성함': o.customerName,
+        '전화번호': o.customerPhone,
+        '시': o.orderType === 'delivery' ? o.addressCity : '',
+        '구': o.orderType === 'delivery' ? o.addressDistrict : '',
+        '동': o.orderType === 'delivery' ? o.addressDong : '',
+        '상세주소': o.orderType === 'delivery' ? o.addressDetail : '',
+        '요청사항': o.request,
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '주문내역');
@@ -369,8 +382,33 @@ export default function AdminOrdersPage() {
                     </div>
                   </td>
                   <td className="px-3 py-3">
-                    <p className="text-sm font-medium text-gray-800">{order.product.name}</p>
-                    <p className="text-xs text-rose-500">{order.product.price.toLocaleString()}원</p>
+                    {(() => {
+                      let items: { name: string; price: number; quantity: number }[] = [];
+                      if (order.itemsJson) {
+                        try { items = JSON.parse(order.itemsJson); } catch {}
+                      }
+                      const total = order.totalAmount || order.product.price;
+                      if (items.length > 1) {
+                        const totalCount = items.reduce((sum, it) => sum + it.quantity, 0);
+                        return (
+                          <div>
+                            <p className="text-sm font-medium text-gray-800" title={items.map(i => `${i.name} (${i.quantity}개)`).join(', ')}>
+                              {items[0].name} 외 {items.length - 1}종 <span className="text-xs text-gray-500 font-normal">({totalCount}개)</span>
+                            </p>
+                            <p className="text-xs text-rose-500 font-semibold">{total.toLocaleString()}원</p>
+                            <p className="text-[11px] text-gray-400 mt-0.5 max-w-[200px] truncate" title={items.map(i => `${i.name}×${i.quantity}`).join(', ')}>
+                              {items.map(i => `${i.name}×${i.quantity}`).join(', ')}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">{order.product.name}</p>
+                          <p className="text-xs text-rose-500 font-semibold">{total.toLocaleString()}원</p>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-3 py-3">
                     <p className="text-sm font-medium text-gray-800">{order.customerName}</p>

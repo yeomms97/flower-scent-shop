@@ -7,7 +7,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Run order creation and settings fetch in parallel for maximum speed
+    const items = body.items && Array.isArray(body.items) && body.items.length > 0 ? body.items : null;
+    const primaryProductId = items ? items[0].productId : body.productId;
+    const calculatedTotal = items
+      ? items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0)
+      : (body.totalAmount || 0);
+
+    const itemsJson = items ? JSON.stringify(items) : null;
+
+    // Run order creation and settings fetch in parallel
     const [order, settings] = await Promise.all([
       prisma.order.create({
         data: {
@@ -22,7 +30,9 @@ export async function POST(request: NextRequest) {
           addressDong: body.addressDong || '',
           addressDetail: body.addressDetail || '',
           request: body.request || '',
-          productId: body.productId,
+          productId: primaryProductId,
+          itemsJson: itemsJson,
+          totalAmount: calculatedTotal,
         },
         include: {
           product: {

@@ -44,6 +44,8 @@ model Order {
   isCompleted     Boolean  @default(false)
   productId       Int
   product         Product  @relation(fields: [productId], references: [id])
+  itemsJson       String?  // JSON list: [{"id":1,"name":"로즈 부케","price":45000,"quantity":1}]
+  totalAmount     Int?     // Total sum of all items
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
