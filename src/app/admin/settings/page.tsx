@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react';
 
 export default function SettingsPage() {
-  const [shopName, setShopName] = useState('꽃향기 플라워');
+  const [shopName, setShopName] = useState('해이지 플레르');
   const [announcement, setAnnouncement] = useState('');
   const [bankName, setBankName] = useState('');
   const [bankAccount, setBankAccount] = useState('');
   const [bankHolder, setBankHolder] = useState('');
   const [saved, setSaved] = useState(false);
+
+  // 비밀번호 변경 상태
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(data => {
@@ -36,6 +42,39 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword) {
+      setPasswordMsg({ text: '현재 비밀번호를 입력해주세요.', type: 'error' });
+      return;
+    }
+    if (!newPassword || newPassword.length < 4) {
+      setPasswordMsg({ text: '새 비밀번호는 최소 4자리 이상이어야 합니다.', type: 'error' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ text: '새 비밀번호와 확인 입력이 일치하지 않습니다.', type: 'error' });
+      return;
+    }
+
+    const res = await fetch('/api/admin/auth', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setPasswordMsg({ text: '비밀번호가 성공적으로 변경되었습니다!', type: 'success' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordMsg(null), 3000);
+    } else {
+      setPasswordMsg({ text: data.error || '비밀번호 변경에 실패했습니다.', type: 'error' });
+    }
+  };
+
   return (
     <div className="max-w-2xl">
       <h2 className="text-xl font-bold text-gray-800 mb-6">상점 설정</h2>
@@ -44,10 +83,10 @@ export default function SettingsPage() {
         {/* Shop Name */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-700 mb-2">🏠 꽃집 상호명 (가게 이름)</h3>
-          <p className="text-xs text-gray-400 mb-3">메인 페이지, 주문서 상단 헤더 및 안내 문구에 노출되는 상호명입니다.</p>
+          <p className="text-xs text-gray-400 mb-3">소비자 메인 페이지, 주문서 상단 헤더 및 안내 문구에 노출되는 상호명입니다.</p>
           <input
             type="text"
-            placeholder="예: 꽃향기 플라워"
+            placeholder="예: 해이지 플레르"
             value={shopName}
             onChange={e => setShopName(e.target.value)}
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
@@ -100,8 +139,64 @@ export default function SettingsPage() {
           onClick={handleSave}
           className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg text-sm font-semibold transition"
         >
-          {saved ? '✅ 설정이 저장되었습니다' : '설정 저장하기'}
+          {saved ? '✅ 기본 설정이 저장되었습니다' : '기본 설정 저장하기'}
         </button>
+
+        {/* Admin Password Change Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mt-8">
+          <h3 className="font-semibold text-gray-700 mb-2">🔐 관리자 비밀번호 변경</h3>
+          <p className="text-xs text-gray-400 mb-4">
+            관리자 페이지(/admin) 접속 시 사용하는 비밀번호를 안전하게 변경할 수 있습니다. (초기 비밀번호: 1234)
+          </p>
+          <form onSubmit={handlePasswordChange} className="space-y-3">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">현재 비밀번호</label>
+              <input
+                type="password"
+                placeholder="현재 사용 중인 비밀번호"
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">새 비밀번호</label>
+              <input
+                type="password"
+                placeholder="새로운 비밀번호 (4자리 이상)"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">새 비밀번호 확인</label>
+              <input
+                type="password"
+                placeholder="새로운 비밀번호 한 번 더 입력"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                required
+              />
+            </div>
+
+            {passwordMsg && (
+              <p className={`text-xs font-medium p-2.5 rounded-lg ${passwordMsg.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+                {passwordMsg.text}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg text-xs font-semibold transition"
+            >
+              비밀번호 변경하기
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
