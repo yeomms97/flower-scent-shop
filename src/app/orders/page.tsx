@@ -22,7 +22,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
-  const [shopName, setShopName] = useState('꽃향기 플라워');
+  const [shopName, setShopName] = useState('해이지 플레르');
   const [name, setName] = useState('');
   const [phoneLast4, setPhoneLast4] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);

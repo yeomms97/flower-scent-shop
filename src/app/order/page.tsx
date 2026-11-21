@@ -16,7 +16,7 @@ function OrderForm() {
   const router = useRouter();
   const productIdParam = searchParams.get('productId');
 
-  const [shopName, setShopName] = useState('꽃향기 플라워');
+  const [shopName, setShopName] = useState('해이지 플레르');
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<number>(0);
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');

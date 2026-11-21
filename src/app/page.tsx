@@ -12,7 +12,7 @@ interface Product {
 }
 
 export default function HomePage() {
-  const [shopName, setShopName] = useState('꽃향기 플라워');
+  const [shopName, setShopName] = useState('해이지 플레르');
   const [products, setProducts] = useState<Product[]>([]);
   const [announcement, setAnnouncement] = useState('');
 

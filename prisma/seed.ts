@@ -12,7 +12,7 @@ async function main() {
 
   // Settings
   const settings = [
-    { key: 'announcement', value: '🌸 꽃향기 플라워에 오신 것을 환영합니다!\n\n신선한 꽃을 정성껏 준비합니다.\n배달 및 픽업 주문이 가능합니다.\n\n영업시간: 오전 9시 ~ 오후 8시\n문의: 051-123-4567' },
+    { key: 'announcement', value: '🌸 해이지 플레르에 오신 것을 환영합니다!\n\n신선한 꽃을 정성껏 준비합니다.\n배달 및 픽업 주문이 가능합니다.\n\n영업시간: 오전 9시 ~ 오후 8시\n문의: 051-123-4567' },
     { key: 'bank_name', value: '국민은행' },
     { key: 'bank_account', value: '123-456-789012' },
     { key: 'bank_holder', value: '김꽃집' },
