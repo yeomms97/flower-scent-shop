@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '해이지 플레르',
-  description: '해이지 플레르 온라인 꽃 예약 및 주문',
+  title: '해이지 플레르 | haizy fleur',
+  description: '해이지 플레르(haizy fleur) 온라인 꽃 예약 및 주문',
   openGraph: {
-    title: '해이지 플레르',
-    description: '해이지 플레르 온라인 꽃 예약 및 주문',
+    title: '해이지 플레르 | haizy fleur',
+    description: '해이지 플레르(haizy fleur) 온라인 꽃 예약 및 주문',
     siteName: '해이지 플레르',
   },
 };
