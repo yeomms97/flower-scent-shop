@@ -3,19 +3,19 @@ import './globals.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://haizy-fleur.vercel.app'),
-  title: '해이지 플레르 | haizy fleur',
+  title: '해이지 플레르_주문',
   description: '해이지 플레르(haizy fleur) 온라인 꽃 예약 및 주문',
   openGraph: {
-    title: '해이지 플레르 | haizy fleur',
+    title: '해이지 플레르_주문',
     description: '해이지 플레르(haizy fleur) 온라인 꽃 예약 및 주문',
     url: 'https://haizy-fleur.vercel.app',
-    siteName: '해이지 플레르',
+    siteName: '해이지 플레르_주문',
     locale: 'ko_KR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: '해이지 플레르 | haizy fleur',
+    title: '해이지 플레르_주문',
     description: '해이지 플레르(haizy fleur) 온라인 꽃 예약 및 주문',
   },
 };

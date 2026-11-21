@@ -67,6 +67,19 @@ export default function ProductsPage() {
     loadProducts();
   };
 
+  const handleRemoveProductImage = async (p: Product) => {
+    if (!confirm(`'${p.name}' 상품의 사진을 삭제하시겠습니까?\n(삭제 시 기본 꽃 일러스트로 표시됩니다)`)) return;
+    await fetch('/api/admin/products', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: p.id, imageUrl: '' }),
+    });
+    if (editing && editing.id === p.id) {
+      setForm(prev => ({ ...prev, imageUrl: '' }));
+    }
+    loadProducts();
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -92,7 +105,26 @@ export default function ProductsPage() {
               <input type="file" accept="image/*" onChange={handleImageUpload}
                 className="text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
               {uploading && <span className="text-xs text-gray-400 ml-2">업로드 중...</span>}
-              {form.imageUrl && <img src={form.imageUrl} alt="preview" className="mt-2 h-24 rounded-lg object-cover" />}
+              {form.imageUrl ? (
+                <div className="mt-2.5 flex items-start gap-3 p-2.5 bg-gray-50 rounded-xl border border-gray-200/60 max-w-md">
+                  <img src={form.imageUrl} alt="preview" className="h-24 w-20 rounded-lg object-cover border border-gray-200" />
+                  <div className="flex-1 flex flex-col justify-between self-stretch py-0.5">
+                    <div>
+                      <span className="text-xs font-medium text-gray-700 block">등록된 사진</span>
+                      <span className="text-[11px] text-gray-400">사진을 지우려면 아래 삭제 버튼을 누르세요.</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, imageUrl: '' }))}
+                      className="inline-flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1.5 rounded-lg transition font-medium w-fit"
+                    >
+                      <span>🗑️</span> 사진 삭제 (기본 이미지 적용)
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1.5 text-xs text-gray-400">등록된 사진이 없습니다. (사진이 없으면 기본 꽃 일러스트가 노출됩니다)</p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="isAvailable" checked={form.isAvailable} onChange={e => setForm(p => ({ ...p, isAvailable: e.target.checked }))} />
@@ -127,9 +159,14 @@ export default function ProductsPage() {
               </div>
               <p className="text-rose-500 font-bold text-sm">{p.price.toLocaleString()}원</p>
               {p.description && <p className="text-gray-500 text-xs mt-1 line-clamp-2">{p.description}</p>}
-              <div className="flex gap-2 mt-3">
-                <button onClick={() => handleEdit(p)} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition">수정</button>
-                <button onClick={() => handleDelete(p.id)} className="text-xs bg-red-50 hover:bg-red-100 text-red-500 px-3 py-1.5 rounded-lg transition">삭제</button>
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                <button onClick={() => handleEdit(p)} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition font-medium">수정</button>
+                {p.imageUrl && (
+                  <button onClick={() => handleRemoveProductImage(p)} className="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 px-2.5 py-1.5 rounded-lg transition font-medium">
+                    사진만 삭제
+                  </button>
+                )}
+                <button onClick={() => handleDelete(p.id)} className="text-xs bg-red-50 hover:bg-red-100 text-red-500 px-3 py-1.5 rounded-lg transition">상품 삭제</button>
               </div>
             </div>
           </div>

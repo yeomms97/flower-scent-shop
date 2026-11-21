@@ -26,15 +26,16 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
+  const updateData: any = {};
+  if (body.name !== undefined) updateData.name = body.name;
+  if (body.price !== undefined) updateData.price = body.price;
+  if (body.description !== undefined) updateData.description = body.description;
+  if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
+  if (body.isAvailable !== undefined) updateData.isAvailable = body.isAvailable;
+
   const product = await prisma.product.update({
     where: { id: body.id },
-    data: {
-      name: body.name,
-      price: body.price,
-      description: body.description || '',
-      imageUrl: body.imageUrl || '',
-      isAvailable: body.isAvailable ?? true,
-    },
+    data: updateData,
   });
   return NextResponse.json(product);
 }
