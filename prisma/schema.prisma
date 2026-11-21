@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Settings {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int
+  description String   @default("")
+  imageUrl    String   @default("")
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}
+
+model Order {
+  id              Int      @id @default(autoincrement())
+  orderType       String   // "delivery" or "pickup"
+  paymentMethod   String   @default("bank_transfer") // "bank_transfer" or "card"
+  customerName    String
+  customerPhone   String
+  deliveryDate    String   // ISO date string
+  deliveryHour    Int      @default(12)
+  addressCity     String   @default("")
+  addressDistrict String   @default("")
+  addressDong     String   @default("")
+  addressDetail   String   @default("")
+  request         String   @default("")
+  isCompleted     Boolean  @default(false)
+  productId       Int
+  product         Product  @relation(fields: [productId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AdminAuth {
+  id       Int    @id @default(autoincrement())
+  password String
+}
